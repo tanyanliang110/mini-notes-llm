@@ -1,0 +1,18 @@
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  base: './',
+  root: ".",
+  build: {
+    outDir: "../bundle",
+    emptyOutDir: true,
+    rollupOptions: {
+      external: [
+        "/static/anna-apps/_sdk/latest/index.js",
+      ],
+    },
+  },
+  server: {
+    port: 3000,
+  },
+});

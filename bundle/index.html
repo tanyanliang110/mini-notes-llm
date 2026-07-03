@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Notes</title>
+    <script type="module" crossorigin src="./assets/index-DKw5Utph.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BScAy4mw.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="shell__head">
+        <h1 class="brand">Mini Notes</h1>
+        <span id="conn-status" class="dot dot--off" title="Disconnected"></span>
+      </header>
+
+      <!-- Note input -->
+      <section class="card card--input">
+        <div class="input-row">
+          <input
+            id="note-input"
+            type="text"
+            maxlength="280"
+            placeholder="Write a note..."
+            autocomplete="off"
+          />
+          <button id="add-btn" class="btn btn--primary" type="button">Add</button>
+        </div>
+      </section>
+
+      <!-- Notes list -->
+      <section class="card card--notes">
+        <div class="card__head">
+          <h2>Notes</h2>
+          <button id="summarize-btn" class="btn btn--secondary" type="button">
+            Summarize
+          </button>
+        </div>
+        <ul id="notes-list" class="notes-list" aria-live="polite">
+          <li class="notes-list__empty">No notes yet. Write one above.</li>
+        </ul>
+      </section>
+
+      <!-- Summary panel (hidden until summary is generated) -->
+      <section id="summary-panel" class="card card--summary" hidden>
+        <div class="card__head">
+          <h2>Summary</h2>
+          <button id="dismiss-summary-btn" class="btn btn--ghost" type="button">Clear</button>
+        </div>
+        <p id="summary-text" class="summary-text"></p>
+        <div id="summary-meta" class="summary-meta muted"></div>
+      </section>
+
+      <!-- Error banner -->
+      <div id="error-banner" class="error-banner" hidden>
+        <span id="error-text"></span>
+        <button id="dismiss-error-btn" class="btn btn--ghost" type="button">Dismiss</button>
+      </div>
+
+      <footer class="shell__foot">
+        <span class="muted">Anna App - v1.0.0</span>
+      </footer>
+    </main>
+
+  </body>
+</html>

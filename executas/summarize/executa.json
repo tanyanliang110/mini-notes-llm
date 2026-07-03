@@ -1,0 +1,41 @@
+{
+  "slug": "summarize",
+  "name": "summarize",
+  "version": "1.0.0",
+  "executa_type": "tool",
+  "description": "Summarizes notes by asking the host to sample an LLM via reverse sampling/createMessage.",
+  "tool_id": "mini-notes-summarize",
+  "type": "python",
+  "enabled": true,
+  "distribution": {
+    "active": "local",
+    "profiles": {
+      "local": {
+        "type": "local",
+        "supports_protocol": true
+      },
+      "binary": {
+        "type": "binary",
+        "executable_name": "mini-notes-summarize",
+        "supports_protocol": true,
+        "binary_urls": {
+          "darwin-arm64": {
+            "url": "https://github.com/tanyanliang110/mini-notes-llm/releases/download/v1.0.0/mini-notes-summarize-darwin-arm64.tar.gz",
+            "entrypoint": "mini-notes-summarize",
+            "format": "tar.gz"
+          },
+          "darwin-x86_64": {
+            "url": "https://github.com/tanyanliang110/mini-notes-llm/releases/download/v1.0.0/mini-notes-summarize-darwin-x86_64.tar.gz",
+            "entrypoint": "mini-notes-summarize",
+            "format": "tar.gz"
+          },
+          "windows-x86_64": {
+            "url": "https://github.com/tanyanliang110/mini-notes-llm/releases/download/v1.0.0/mini-notes-summarize-windows-x86_64.zip",
+            "entrypoint": "mini-notes-summarize.exe",
+            "format": "zip"
+          }
+        }
+      }
+    }
+  }
+}

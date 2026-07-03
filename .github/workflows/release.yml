@@ -1,0 +1,71 @@
+name: Release Executa Binary
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version tag (e.g. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: darwin-arm64
+            runner: macos-latest
+          - platform: darwin-x86_64
+            runner: macos-13
+          - platform: windows-x86_64
+            runner: windows-latest
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout anna-executa-examples (for executa_sdk)
+        uses: actions/checkout@v4
+        with:
+          repository: whtcjdtc2007/anna-executa-examples
+          path: ../examples/anna-executa-examples
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller>=6.19.0
+        shell: bash
+
+      - name: Build, smoke test & package
+        run: python scripts/package.py --platform ${{ matrix.platform }}
+        shell: bash
+
+      - name: Upload release asset (macOS tar.gz)
+        if: runner.os == 'macOS'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          files: dist/mini-notes-summarize-${{ matrix.platform }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset (Windows zip)
+        if: runner.os == 'Windows'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          files: dist/mini-notes-summarize-${{ matrix.platform }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

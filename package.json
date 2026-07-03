@@ -1,0 +1,16 @@
+{
+  "name": "mini-notes-llm",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Mini Notes with LLM Summary — Anna App example",
+  "scripts": {
+    "build": "cd frontend && npm run build",
+    "dev": "anna-app dev --no-llm",
+    "validate": "anna-app validate --strict",
+    "executa:dev": "cd executas/summarize && anna-app executa dev --mock-sampling ../../fixtures/mock-sampling.jsonl",
+    "executa:test": "uv run --project executas/summarize mini-notes-summarize"
+  },
+  "devDependencies": {
+    "@anna-ai/cli": "^0.1.33"
+  }
+}
