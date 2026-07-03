@@ -3,7 +3,7 @@
 
 a = Analysis(
     ['D:\\workplace\\anna\\mini-notes-llm\\executas\\summarize\\summarize_tool.py'],
-    pathex=['D:\\workplace\\anna\\examples\\anna-executa-examples\\sdk\\python'],
+    pathex=['D:\\workplace\\anna\\mini-notes-llm\\python'],
     binaries=[],
     datas=[],
     hiddenimports=['executa_sdk', 'executa_sdk.sampling', 'executa_sdk.storage'],

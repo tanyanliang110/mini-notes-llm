@@ -7,7 +7,7 @@
   ],
   "required_executas": [
     {
-      "tool_id": "bundled:summarize",
+      "tool_id": "mini-notes-summarize",
       "min_version": "0.1.0",
       "version": "latest"
     }
