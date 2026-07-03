@@ -227,6 +227,7 @@ python scripts/package.py
 2. 冒烟测试：向二进制发送 `describe` JSON-RPC 请求
 3. 将二进制 + `manifest.json` 打包为平台归档：
    - macOS：`mini-notes-summarize-{platform}.tar.gz`
+   - Linux：`mini-notes-summarize-linux-x86_64.tar.gz`
    - Windows：`mini-notes-summarize-windows-x86_64.zip`
 
 归档根目录包含：
@@ -241,9 +242,10 @@ python scripts/package.py
 
 **触发方式：** `workflow_dispatch`（手动触发）或推送 `v*` 标签自动触发。
 
-**产出 3 个 Release Asset：**
+**产出 4 个 Release Asset：**
 - `mini-notes-summarize-darwin-arm64.tar.gz`
 - `mini-notes-summarize-darwin-x86_64.tar.gz`
+- `mini-notes-summarize-linux-x86_64.tar.gz`
 - `mini-notes-summarize-windows-x86_64.zip`
 
 每个构建产物都会在上传前进行冒烟测试（发送 `describe` JSON-RPC 并验证响应）。

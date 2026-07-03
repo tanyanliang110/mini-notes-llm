@@ -217,6 +217,7 @@ What it does:
 2. Smoke test: sends `describe` JSON-RPC to the binary
 3. Packages binary + `manifest.json` into platform archive:
    - macOS: `mini-notes-summarize-{platform}.tar.gz`
+   - Linux: `mini-notes-summarize-linux-x86_64.tar.gz`
    - Windows: `mini-notes-summarize-windows-x86_64.zip`
 
 Archive root contains:
@@ -231,9 +232,10 @@ Workflow at `.github/workflows/release.yml`.
 
 **Triggers:** `workflow_dispatch` (manual) or `v*` tag push.
 
-**Produces 3 release assets:**
+**Produces 4 release assets:**
 - `mini-notes-summarize-darwin-arm64.tar.gz`
 - `mini-notes-summarize-darwin-x86_64.tar.gz`
+- `mini-notes-summarize-linux-x86_64.tar.gz`
 - `mini-notes-summarize-windows-x86_64.zip`
 
 Each includes a smoke test (describe JSON-RPC) before upload.

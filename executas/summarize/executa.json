@@ -29,6 +29,11 @@
             "entrypoint": "mini-notes-summarize",
             "format": "tar.gz"
           },
+          "linux-x86_64": {
+            "url": "https://github.com/tanyanliang110/mini-notes-llm/releases/download/v1.0.0/mini-notes-summarize-linux-x86_64.tar.gz",
+            "entrypoint": "mini-notes-summarize",
+            "format": "tar.gz"
+          },
           "windows-x86_64": {
             "url": "https://github.com/tanyanliang110/mini-notes-llm/releases/download/v1.0.0/mini-notes-summarize-windows-x86_64.zip",
             "entrypoint": "mini-notes-summarize.exe",
