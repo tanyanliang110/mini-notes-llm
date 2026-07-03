@@ -1,6 +1,6 @@
 > [English version → README.en.md](./README.en.md)
 
-# Mini Notes with LLM Summary（中文说明）
+# Mini Notes with LLM Summary
 
 一款 Anna App，用户可以创建、查看和删除笔记。笔记通过 **Anna storage Host API**（`anna.storage.get` / `anna.storage.set`）持久化。点击 **Summarize** 按钮会通过 JSON-RPC 调用本地 **Executa Tool**，该 Tool 使用 **反向 `sampling/createMessage`** 让宿主 LLM 生成总结。
 
@@ -37,8 +37,8 @@ mini-notes-llm/
 │   └── package.py                # 二进制打包脚本
 ├── .github/workflows/
 │   └── release.yml               # GitHub Actions 发布流水线
-├── README.md                     # 英文说明
-└── README.zh-CN.md               # 中文说明（本文件）
+├── README.md                     # 中文说明（本文件）
+└── README.en.md                  # 英文说明
 ```
 
 ---
