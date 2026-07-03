@@ -121,14 +121,14 @@ the Executa Tool.
 4. **Click Summarize** — In `--no-llm` mode, LLM/sampling is disabled.
    The frontend calls `anna.tools.invoke(...)`, the harness routes to the Executa
    Tool, and the Tool issues `sampling/createMessage`. Since LLM is disabled,
-   the sampling request goes unanswered and the Tool times out:
+   the harness returns:
 
    ```
-   [-32005] sampling/createMessage timed out after 60.0s
+   [-32603] manifest does not grant 'llm.complete'
    ```
 
    **This is expected.** It proves the complete chain works: frontend →
-   `anna.tools.invoke` → Executa invoke → `sampling/createMessage`. The timeout
+   `anna.tools.invoke` → Executa invoke → `sampling/createMessage`. The error
    is caused by `--no-llm` disabling the LLM bridge, not by a bug.
 
 ---

@@ -127,13 +127,13 @@ npm run dev
 3. **删除笔记** — 点击笔记旁的 Delete，列表立即更新。
 4. **点击 Summarize** — 在 `--no-llm` 模式下，LLM/sampling 被禁用。
    前端会调用 `anna.tools.invoke(...)`，harness 将请求路由到 Executa Tool，
-   Tool 发出 `sampling/createMessage`。由于 LLM 不可用，sampling 请求得不到响应，Tool 超时：
+   Tool 发出 `sampling/createMessage`。由于 LLM 不可用，返回错误：
 
    ```
-   [-32005] sampling/createMessage timed out after 60.0s
+   [-32603] manifest does not grant 'llm.complete'
    ```
 
-   **这是预期行为。** 它证明了完整链路：前端 → `anna.tools.invoke` → Executa invoke → `sampling/createMessage`。超时是因为 `--no-llm` 禁用了 LLM bridge，不是 Bug。
+   **这是预期行为。** 它证明了完整链路：前端 → `anna.tools.invoke` → Executa invoke → `sampling/createMessage`。错误是因为 `--no-llm` 禁用了 LLM bridge，不是 Bug。
 
 ---
 
