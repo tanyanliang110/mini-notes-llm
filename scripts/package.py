@@ -35,6 +35,7 @@ DIST_DIR = ROOT / "dist"
 PLATFORM_MAP = {
     "darwin-arm64": {"system": "Darwin", "machine": "arm64", "ext": "", "format": "tar.gz"},
     "darwin-x86_64": {"system": "Darwin", "machine": "x86_64", "ext": "", "format": "tar.gz"},
+    "linux-x86_64": {"system": "Linux", "machine": "x86_64", "ext": "", "format": "tar.gz"},
     "windows-x86_64": {"system": "Windows", "machine": "AMD64", "ext": ".exe", "format": "zip"},
 }
 
