@@ -1,27 +1,26 @@
-# Mini Notes with LLM Summary
+> [English version → README.en.md](./README.en.md)
 
-An Anna App that lets users create, view, and delete notes. Notes are persisted
-via the **Anna storage Host API** (`anna.storage.get` / `anna.storage.set`).
-A **Summarize** button invokes a local **Executa Tool** over JSON-RPC, which
-uses **reverse `sampling/createMessage`** to ask the host LLM for a summary.
+# Mini Notes with LLM Summary（中文说明）
 
-> This is a local-development Anna App. No real Anna account or LLM API key required.
+一款 Anna App，用户可以创建、查看和删除笔记。笔记通过 **Anna storage Host API**（`anna.storage.get` / `anna.storage.set`）持久化。点击 **Summarize** 按钮会通过 JSON-RPC 调用本地 **Executa Tool**，该 Tool 使用 **反向 `sampling/createMessage`** 让宿主 LLM 生成总结。
+
+> 这是一个纯本地开发的 Anna App，不需要真实 Anna 账号，也不需要 LLM API key。
 
 ---
 
-## Project Structure
+## 项目结构
 
 ```
 mini-notes-llm/
-├── manifest.json                  # Anna App manifest
-├── package.json                   # Root scripts
-├── bundle/                        # Built frontend output
-├── frontend/                      # Vite + vanilla JS source
+├── manifest.json                  # Anna App 清单
+├── package.json                   # 根脚本
+├── bundle/                        # 前端构建产物
+├── frontend/                      # Vite + 原生 JS 源码
 │   ├── src/
-│   │   ├── main.js               # AnnaAppRuntime.connect() + bootstrap
-│   │   ├── storage.js            # anna.storage wrappers
-│   │   ├── tools.js              # anna.tools.invoke wrapper
-│   │   └── ui.js                 # DOM rendering + events
+│   │   ├── main.js               # AnnaAppRuntime.connect() 初始化
+│   │   ├── storage.js            # anna.storage 封装
+│   │   ├── tools.js              # anna.tools.invoke 封装
+│   │   └── ui.js                 # DOM 渲染与事件
 │   ├── index.html
 │   ├── style.css
 │   ├── package.json
@@ -33,221 +32,232 @@ mini-notes-llm/
 │       ├── pyproject.toml
 │       └── pyinstaller.spec
 ├── fixtures/
-│   └── mock-sampling.jsonl
+│   └── mock-sampling.jsonl       # Mock sampling fixture
 ├── scripts/
-│   └── package.py
+│   └── package.py                # 二进制打包脚本
 ├── .github/workflows/
-│   └── release.yml
-└── README.md
+│   └── release.yml               # GitHub Actions 发布流水线
+├── README.md                     # 英文说明
+└── README.zh-CN.md               # 中文说明（本文件）
 ```
 
 ---
 
-## Core Concepts
+## 核心概念
 
-| Concept | Description |
-|---------|-------------|
-| **manifest.json** | Declares app identity, permissions, required Executas, UI bundle, host API access |
-| **Bundle** | Built frontend loaded in Anna App iframe; communicates via `AnnaAppRuntime` |
-| **Executa Tool** | Standalone process (Python) communicating via JSON-RPC 2.0 over stdio |
-| **Anna storage / APS KV** | Persistent KV storage via `anna.storage.get` / `anna.storage.set` |
-| **Sampling** | Reverse JSON-RPC: Tool sends `sampling/createMessage`, host runs LLM, returns result |
-| **Binary archive** | Self-contained PyInstaller binary + manifest.json, packaged as .tar.gz or .zip |
+| 概念 | 说明 |
+|------|------|
+| **manifest.json** | 声明 App 身份、权限、所需 Executa、UI bundle、host API 访问 |
+| **Bundle** | 构建后的前端，在 Anna App iframe 中加载，通过 `AnnaAppRuntime` 通信 |
+| **Executa Tool** | 独立进程（Python），通过 JSON-RPC 2.0 over stdio 与宿主通信 |
+| **Anna storage / APS KV** | 通过 `anna.storage.get` / `anna.storage.set` 持久化 KV 数据 |
+| **Sampling** | 反向 JSON-RPC：Tool 发出 `sampling/createMessage`，宿主执行 LLM 推理并返回结果 |
+| **Binary archive** | PyInstaller 生成的自包含二进制 + manifest.json，打包为 .tar.gz 或 .zip |
 
 ---
 
-## Setup
+## 环境准备
 
-### Prerequisites
+### 依赖
 
 - **Node.js** >= 18
 - **Python** >= 3.10
-- **`anna-app` CLI** installed globally:
+- **uv**（Python 包管理器，Anna harness 用它启动 Executa）
+  ```bash
+  # Windows PowerShell
+  powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+  # macOS / Linux
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+- **`anna-app` CLI**（全局安装）：
   ```bash
   npm install -g @anna-ai/cli
   ```
 
-### Install Dependencies
+### 安装
 
 ```bash
-# Root
+# 根目录依赖
 npm install
 
-# Frontend
+# 前端依赖
 cd frontend && npm install && cd ..
+
+# Executa 依赖（生成 uv.lock）
+cd executas/summarize && uv lock && cd ../..
 ```
 
 ---
 
-## Build Frontend Bundle
+## 构建前端 Bundle
 
 ```bash
 npm run build
-# or: cd frontend && npm run build && cd ..
+# 等价于: cd frontend && npm run build && cd ..
 ```
 
-Outputs static bundle to `bundle/` directory.
-`manifest.json` points `ui.bundle.entry` to `index.html` inside this directory.
+输出到 `bundle/` 目录。`manifest.json` 的 `ui.bundle.entry` 指向该目录下的 `index.html`。
 
 ---
 
-## Validate Manifest
+## 校验 Manifest
 
 ```bash
 anna-app validate --strict
 ```
 
-Checks schema compliance, permissions, and consistency between
-`required_executas`, `ui.host_api.tools`, and the UI entry.
+检查 schema 合规性、权限、及 `required_executas`、`ui.host_api.tools` 与 UI entry 的一致性。
 
 ---
 
-## UI Harness Testing (`anna-app dev --no-llm`)
+## UI Harness 测试（`anna-app dev --no-llm`）
 
 ```bash
 npm run dev
-# or: anna-app dev --no-llm
+# 等价于: anna-app dev --no-llm
 ```
 
-Launches the local Anna harness, loads your frontend in an iframe, and registers
-the Executa Tool.
+启动本地 Anna harness，在 iframe 中加载前端，并注册 Executa Tool。
 
-### What to test
+### 测试项目
 
-1. **Create notes** — Type text and click Add. Notes appear in the list.
-2. **Verify storage** — Every create/delete triggers `anna.storage.set(key: "mini-notes:items")`.
-   On load, `anna.storage.get(key: "mini-notes:items")` is called.
-3. **Delete notes** — Click Delete on any note. List updates immediately.
-4. **Click Summarize** — In `--no-llm` mode, LLM/sampling is disabled.
-   The frontend calls `anna.tools.invoke(...)`, the harness routes to the Executa
-   Tool, and the Tool issues `sampling/createMessage`. Since LLM is disabled,
-   the sampling request goes unanswered and the Tool times out:
+1. **创建笔记** — 输入文字点击 Add，笔记出现在列表中。
+2. **验证存储** — 每次创建/删除都会触发 `anna.storage.set(key: "mini-notes:items")`。
+   加载时会调用 `anna.storage.get(key: "mini-notes:items")`。
+3. **删除笔记** — 点击笔记旁的 Delete，列表立即更新。
+4. **点击 Summarize** — 在 `--no-llm` 模式下，LLM/sampling 被禁用。
+   前端会调用 `anna.tools.invoke(...)`，harness 将请求路由到 Executa Tool，
+   Tool 发出 `sampling/createMessage`。由于 LLM 不可用，sampling 请求得不到响应，Tool 超时：
 
    ```
    [-32005] sampling/createMessage timed out after 60.0s
    ```
 
-   **This is expected.** It proves the complete chain works: frontend →
-   `anna.tools.invoke` → Executa invoke → `sampling/createMessage`. The timeout
-   is caused by `--no-llm` disabling the LLM bridge, not by a bug.
+   **这是预期行为。** 它证明了完整链路：前端 → `anna.tools.invoke` → Executa invoke → `sampling/createMessage`。超时是因为 `--no-llm` 禁用了 LLM bridge，不是 Bug。
 
 ---
 
-## Backend Sampling Test (`anna-app executa dev --mock-sampling`)
+## 后端 Sampling 测试（`anna-app executa dev --mock-sampling`）
 
 ```bash
 npm run executa:dev
-# or: anna-app executa dev --mock-sampling fixtures/mock-sampling.jsonl
 ```
 
-This:
-1. Starts the Python Executa Tool
-2. Sends test `initialize`, `describe`, and `invoke` messages
-3. When the Tool issues `sampling/createMessage`, the mock harness responds
-   with content from `fixtures/mock-sampling.jsonl`
-4. The Tool returns the summary result
+这会：
+1. 启动 Python Executa Tool
+2. 完成 `initialize`、`describe` 握手
+3. 进入交互式 REPL，可发送 `invoke` 命令
+4. 当 Tool 发出 `sampling/createMessage` 时，mock harness 用 `fixtures/mock-sampling.jsonl` 中的内容响应
+5. Tool 立即返回总结结果（不会超时）
 
-### Verifying sampling was initiated
+### 验证 sampling 已发起
 
-- **Check stderr output** for "Mini Notes Summarizer v1.0.0 started"
-- **Check the fixture** at `fixtures/mock-sampling.jsonl` — it contains a mock
-  LLM response consumed by the harness
-- **Manual protocol test** — pipe JSON-RPC to the Tool directly (see below)
+- **stderr 输出**会显示 "Mini Notes Summarizer v1.0.0 started"
+- **`fixtures/mock-sampling.jsonl`** 包含 mock LLM 响应内容
+- **手动协议测试** — 直接通过管道向 Tool 发送 JSON-RPC（见下文）
+- **对比验证**：有 `--mock-sampling` 时秒返结果；无 mock（`npm run dev`）时 60 秒超时 —— 这证明 `sampling/createMessage` 确实被发起
 
 ---
 
-## Manual JSON-RPC Testing
+## 手动 JSON-RPC 测试
 
-### initialize (v2 handshake)
+### initialize（v2 握手）
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2.0"}}' | uv run --project executas/summarize mini-notes-summarize
 ```
-Expected: response with `client_capabilities.sampling: {}`.
+预期：返回含 `client_capabilities.sampling: {}` 的响应。
 
-### describe (get manifest)
+### describe（获取清单）
 ```bash
 echo '{"jsonrpc":"2.0","id":2,"method":"describe","params":{}}' | uv run --project executas/summarize mini-notes-summarize
 ```
-Expected: manifest with `display_name`, `tools[]`, `host_capabilities`.
+预期：返回含 `display_name`、`tools[]`、`host_capabilities` 的清单。
+
+### invoke（调用总结）
+```bash
+echo '{"jsonrpc":"2.0","id":3,"method":"invoke","params":{"tool":"summarize","arguments":{"notes":[{"content":"你好","order":1}],"max_words":50},"invoke_id":"test-1"}}' | uv run --project executas/summarize mini-notes-summarize
+```
+预期：返回 `{"success": true, "tool": "summarize", "data": {...}}`。
 
 ### health / shutdown
 ```bash
-echo '{"jsonrpc":"2.0","id":3,"method":"health","params":{}}' | uv run --project executas/summarize mini-notes-summarize
-echo '{"jsonrpc":"2.0","id":4,"method":"shutdown","params":{}}' | uv run --project executas/summarize mini-notes-summarize
+echo '{"jsonrpc":"2.0","id":4,"method":"health","params":{}}' | uv run --project executas/summarize mini-notes-summarize
+echo '{"jsonrpc":"2.0","id":5,"method":"shutdown","params":{}}' | uv run --project executas/summarize mini-notes-summarize
 ```
 
 ---
 
-## Verifying Storage Uses `anna.storage.*`
+## 验证笔记存储走的是 `anna.storage.*`
 
-1. Start `anna-app dev --no-llm`
-2. Open browser DevTools Console
-3. Look for `storage.get` with key `"mini-notes:items"` on load
-4. Look for `storage.set` with key `"mini-notes:items"` on create/delete
-
-The `storage.js` module never calls `localStorage` — all persistence goes
-through `anna.storage.get` / `anna.storage.set`.
-
----
-
-## Verifying Summary Uses `anna.tools.invoke -> Executa -> sampling`
-
-**Evidence chain:**
-1. `tools.js` calls `anna.tools.invoke({ tool_id, method: "summarize", args })`
-2. Anna harness routes to Executa Tool process
-3. `summarize_tool.py:_handle_invoke` receives the request
-4. `_summarize()` calls `sampling.create_message(...)` → writes to stdout
-5. Host processes sampling, returns LLM response
-6. Tool returns result to frontend
-
-Check `summarize_tool.py` for `sampling.create_message(...)` calls with
-`metadata: { executa_invoke_id, tool: "summarize" }`.
+1. 启动 `anna-app dev --no-llm`
+2. 打开浏览器 DevTools Console
+3. 观察 RPC 日志：
+   - 加载时出现 `storage.get`，key 为 `"mini-notes:items"`
+   - 创建/删除时出现 `storage.set`，key 为 `"mini-notes:items"`
+4. `storage.js` 中从未调用 `localStorage` —— 所有持久化都走 `anna.storage.get` / `anna.storage.set`
 
 ---
 
-## Binary Packaging
+## 验证总结走的是 `anna.tools.invoke -> Executa -> sampling`
+
+**证据链：**
+1. `tools.js` 调用 `anna.tools.invoke({ tool_id, method: "summarize", args })`
+2. Anna harness 将请求路由到 Executa Tool 进程
+3. `summarize_tool.py:_handle_invoke` 接收请求
+4. `_summarize()` 调用 `sampling.create_message(...)` → 写入 stdout
+5. 宿主处理 sampling，返回 LLM 响应
+6. Tool 将结果返回前端
+
+确认方式：
+- 查看 `summarize_tool.py` 中 `sampling.create_message(...)` 调用，参数中包含 `metadata: { executa_invoke_id, tool: "summarize" }`
+- 在 `--no-llm` 下点 Summarize 得到 timeout（证明 Tool 发出了 sampling 请求但没人响应）
+- 在 `--mock-sampling` 下秒返 mock 结果（证明 mock harness 拦截了 sampling 请求）
+
+---
+
+## 二进制打包
 
 ```bash
 pip install pyinstaller>=6.19.0
 python scripts/package.py
 ```
 
-What it does:
-1. PyInstaller compiles `summarize_tool.py` into a single-file binary
-2. Smoke test: sends `describe` JSON-RPC to the binary
-3. Packages binary + `manifest.json` into platform archive:
-   - macOS: `mini-notes-summarize-{platform}.tar.gz`
-   - Windows: `mini-notes-summarize-windows-x86_64.zip`
+脚本流程：
+1. PyInstaller 将 `summarize_tool.py` 编译为单文件二进制
+2. 冒烟测试：向二进制发送 `describe` JSON-RPC 请求
+3. 将二进制 + `manifest.json` 打包为平台归档：
+   - macOS：`mini-notes-summarize-{platform}.tar.gz`
+   - Windows：`mini-notes-summarize-windows-x86_64.zip`
 
-Archive root contains:
-- `manifest.json` — binary distribution manifest
-- `mini-notes-summarize` (or `.exe`) — entrypoint
+归档根目录包含：
+- `manifest.json` — 二进制分发清单
+- `mini-notes-summarize`（或 `.exe`）— 可执行入口
 
 ---
 
-## GitHub Actions Release
+## GitHub Actions 发布
 
-Workflow at `.github/workflows/release.yml`.
+流水线位于 `.github/workflows/release.yml`。
 
-**Triggers:** `workflow_dispatch` (manual) or `v*` tag push.
+**触发方式：** `workflow_dispatch`（手动触发）或推送 `v*` 标签自动触发。
 
-**Produces 3 release assets:**
+**产出 3 个 Release Asset：**
 - `mini-notes-summarize-darwin-arm64.tar.gz`
 - `mini-notes-summarize-darwin-x86_64.tar.gz`
 - `mini-notes-summarize-windows-x86_64.zip`
 
-Each includes a smoke test (describe JSON-RPC) before upload.
+每个构建产物都会在上传前进行冒烟测试（发送 `describe` JSON-RPC 并验证响应）。
 
 ---
 
-## Quick Reference
+## 快速参考
 
-| Task | Command |
-|------|---------|
-| Install deps | `npm install && cd frontend && npm install` |
-| Build frontend | `npm run build` |
-| Validate manifest | `anna-app validate --strict` |
-| UI harness (no LLM) | `npm run dev` |
-| Executa sampling test | `npm run executa:dev` |
-| Manual JSON-RPC test | `echo '{"jsonrpc":"2.0","id":1,"method":"describe","params":{}}' \| uv run --project executas/summarize mini-notes-summarize` |
-| Package binary | `python scripts/package.py` |
+| 任务 | 命令 |
+|------|------|
+| 安装依赖 | `npm install && cd frontend && npm install && cd executas/summarize && uv lock && cd ../..` |
+| 构建前端 | `npm run build` |
+| 校验清单 | `anna-app validate --strict` |
+| UI harness（无 LLM） | `npm run dev` |
+| Executa sampling 测试 | `npm run executa:dev` |
+| 手动 JSON-RPC 测试 | `echo '{"jsonrpc":"2.0","id":1,"method":"describe","params":{}}' \| uv run --project executas/summarize mini-notes-summarize` |
+| 打包二进制 | `python scripts/package.py` |
