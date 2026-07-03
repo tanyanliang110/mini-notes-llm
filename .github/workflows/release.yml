@@ -33,12 +33,6 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
 
-      - name: Checkout anna-executa-examples (for executa_sdk)
-        uses: actions/checkout@v4
-        with:
-          repository: whtcjdtc2007/anna-executa-examples
-          path: ../examples/anna-executa-examples
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

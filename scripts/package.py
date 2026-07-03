@@ -69,6 +69,22 @@ def detect_current_platform():
     raise RuntimeError(f"Unsupported platform: {system} {machine}")
 
 
+def _find_sdk_path():
+    """Resolve executa_sdk path for PyInstaller --paths.
+
+    The project bundles a copy of the executa-sdk under python/.
+    PyInstaller needs --paths pointing to python/ so it can discover the
+    executa_sdk package inside it.
+    """
+    sdk_python = ROOT / "python"
+    if not (sdk_python / "executa_sdk" / "__init__.py").exists():
+        raise FileNotFoundError(
+            f"executa_sdk not found at {sdk_python}\n"
+            "Make sure python/executa_sdk/ is present in the project root"
+        )
+    return sdk_python
+
+
 def build_binary(platform_key):
     """Use PyInstaller to build a single-file binary for the given platform."""
     info = PLATFORM_MAP[platform_key]
@@ -77,14 +93,7 @@ def build_binary(platform_key):
 
     print(f"[package] Building binary for {platform_key} ...")
 
-    # uv resolves it from pyproject.toml via [tool.uv.sources]; PyInstaller
-    # needs an explicit --paths so it can discover the package.
-    sdk_python = ROOT.parent / "examples" / "anna-executa-examples" / "sdk" / "python"
-    if not (sdk_python / "executa_sdk" / "__init__.py").exists():
-        raise FileNotFoundError(
-            f"executa_sdk not found at {sdk_python}\n"
-            "Make sure the anna-executa-examples repo is cloned at ../examples/anna-executa-examples"
-        )
+    sdk_python = _find_sdk_path()
 
     # PyInstaller build
     cmd = [
